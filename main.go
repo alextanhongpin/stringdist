@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"sort"
 )
 
 // Maximum word length that is supported.
@@ -63,11 +64,18 @@ func main() {
 	reader := bufio.NewScanner(os.Stdin)
 	for reader.Scan() {
 		search := reader.Bytes()
-		result := bkTree.Search(search, TOLERANCE)
-
-		// sort.Sort(result)
+		result := sortByteSlice(bkTree.Search(search, TOLERANCE))
+		sort.Sort(result)
+		// Add more heuristic to just diplay the top 10 results. If the
+		// results are less than 10, exclude em (or probably recommend
+		// the closest thing)
+		// Sorting the ones with the jaroWinkler score is an option,
+		// Or try other edit distance probabilty.
+		// Another way is to see how many times such word repeats in a
+		// corpus of text. (The probability of THE is higher than TEA,
+		// unless the content is about tea)
 		for _, res := range result {
-			fmt.Println(string(res), jaro(string(res), string(search)))
+			fmt.Println(string(res), JaroWinkler([]rune(string(res)), []rune(string(search))))
 		}
 		fmt.Println(len(result))
 	}
@@ -125,7 +133,6 @@ func (b *BKTree) recursiveSearch(node *Node, result *[][]byte, word []byte, d in
 	curDist := b.distanceCalculator.Compute(node.word, word)
 	minDist := curDist - d
 	maxDist := curDist + d
-	// if curDist <= d && bytes.Equal(node.word[0:1], word[0:1]) {
 	if curDist <= d {
 		*result = append(*result, node.word)
 	}
@@ -153,13 +160,13 @@ func min(nums ...int) int {
 }
 
 // implement `Interface` in sort package.
-type sortByteArrays [][]byte
+type sortByteSlice [][]byte
 
-func (b sortByteArrays) Len() int {
+func (b sortByteSlice) Len() int {
 	return len(b)
 }
 
-func (b sortByteArrays) Less(i, j int) bool {
+func (b sortByteSlice) Less(i, j int) bool {
 	// bytes package already implements Comparable for []byte.
 	switch bytes.Compare(b[i], b[j]) {
 	case -1:
@@ -172,6 +179,6 @@ func (b sortByteArrays) Less(i, j int) bool {
 	}
 }
 
-func (b sortByteArrays) Swap(i, j int) {
+func (b sortByteSlice) Swap(i, j int) {
 	b[j], b[i] = b[i], b[j]
 }
