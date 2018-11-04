@@ -3,12 +3,12 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"runtime"
 	"runtime/pprof"
-	"sort"
 )
 
 // Maximum word length that is supported.
@@ -18,14 +18,26 @@ const WORD_LENGTH = 32
 const TOLERANCE = 2
 
 func main() {
+	var (
+		cpuout = flag.String("cpu", "", "file to save cpu profiling")
+		memout = flag.String("mem", "", "file to save mem profiling")
+	)
+	flag.Parse()
+	fmt.Println(*cpuout, *memout)
 	// Profile CPU.
-	f, err := os.Create("cpu.out")
+	f, err := os.Create(*cpuout)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 	pprof.StartCPUProfile(f)
 	defer pprof.StopCPUProfile()
+
+	mem, err := os.Create(*memout)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer mem.Close()
 
 	damerauLevenshtein := NewDamerauLevenshtein(WORD_LENGTH)
 	// Initialize BK-Tree.
@@ -37,31 +49,28 @@ func main() {
 		log.Fatal(err)
 	}
 	defer dict.Close()
+
 	scanner := bufio.NewScanner(dict)
 	for scanner.Scan() {
 		bkTree.Add(bytes.ToLower(scanner.Bytes()))
 	}
 
+	// Profile memory.
+	runtime.GC()
+	pprof.WriteHeapProfile(mem)
+
 	fmt.Println("enter some text")
 	reader := bufio.NewScanner(os.Stdin)
 	for reader.Scan() {
 		search := reader.Bytes()
-		result := sortByteArrays(bkTree.Search(search, TOLERANCE))
-		sort.Sort(result)
+		result := bkTree.Search(search, TOLERANCE)
+
+		// sort.Sort(result)
 		for _, res := range result {
-			fmt.Println(string(res))
+			fmt.Println(string(res), jaro(string(res), string(search)))
 		}
 		fmt.Println(len(result))
 	}
-
-	// Profile memory.
-	mem, err := os.Create("mem.out")
-	if err != nil {
-		log.Fatal(err)
-	}
-	runtime.GC()
-	pprof.WriteHeapProfile(mem)
-	defer mem.Close()
 }
 
 type Node struct {
@@ -69,20 +78,11 @@ type Node struct {
 	children map[int]*Node
 }
 
-func NewNode(x []byte) *Node {
+func NewNode(word []byte) *Node {
 	return &Node{
-		word:     x,
-		children: make(map[int]*Node, 2),
+		word:     word,
+		children: make(map[int]*Node, 0),
 	}
-}
-
-func (n *Node) AddChild(key int, node *Node) {
-	n.children[key] = node
-}
-
-func (n *Node) HasKey(key int) bool {
-	_, found := n.children[key]
-	return found
 }
 
 type BKTree struct {
@@ -97,34 +97,40 @@ func NewBKTree(distanceCalculator EditDistanceCalculator) *BKTree {
 }
 
 func (b *BKTree) Add(word []byte) {
+	// If the root is empty, initialize it.
 	if b.root == nil {
 		b.root = NewNode(word)
 		return
 	}
 	curNode := b.root
-	dist := b.distanceCalculator.Compute(curNode.word, word)
-	for curNode.HasKey(dist) {
+	var dist int
+	for {
+		dist = b.distanceCalculator.Compute(curNode.word, word)
+		// Words are equal, return;
 		if dist == 0 {
 			return
 		}
-		curNode = curNode.children[dist]
-		if curNode == nil {
-			return
+		// If the current node does not have the distance yet, insert
+		// into this node.
+		if _, found := curNode.children[dist]; !found {
+			break
 		}
-		dist = b.distanceCalculator.Compute(curNode.word, word)
+		// Else, select the next one.
+		curNode = curNode.children[dist]
 	}
-	curNode.AddChild(dist, NewNode(word))
+	curNode.children[dist] = NewNode(word)
 }
 
 func (b *BKTree) recursiveSearch(node *Node, result *[][]byte, word []byte, d int) {
 	curDist := b.distanceCalculator.Compute(node.word, word)
 	minDist := curDist - d
 	maxDist := curDist + d
+	// if curDist <= d && bytes.Equal(node.word[0:1], word[0:1]) {
 	if curDist <= d {
 		*result = append(*result, node.word)
 	}
-	for key, children := range node.children {
-		if key > minDist && key < maxDist {
+	for i := minDist; i < maxDist; i++ {
+		if children, found := node.children[i]; found {
 			b.recursiveSearch(children, result, word, d)
 		}
 	}
