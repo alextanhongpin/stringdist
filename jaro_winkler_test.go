@@ -1,8 +1,10 @@
-package main
+package stringdist_test
 
 import (
 	"math"
 	"testing"
+
+	"github.com/alextanhongpin/stringdist"
 )
 
 func TestJaroWinkler(t *testing.T) {
@@ -33,8 +35,8 @@ func TestJaroWinkler(t *testing.T) {
 		{"JON", "JAN", 0.778, 0.800},
 	}
 	for _, tt := range tests {
-		jaro := Jaro([]rune(tt.s1), []rune(tt.s2))
-		winkler := JaroWinkler([]rune(tt.s1), []rune(tt.s2))
+		jaro := stringdist.Jaro(tt.s1, tt.s2)
+		winkler := stringdist.JaroWinkler(tt.s1, tt.s2)
 		if math.Round(jaro*1000)/1000 != tt.jaro {
 			t.Fatalf("expected jaro %f, got %f for %s and %s", tt.jaro, jaro, tt.s1, tt.s2)
 		}
