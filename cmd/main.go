@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-
 	var (
 		cpuout = flag.String("cpu", "", "file to save cpu profiling")
 		memout = flag.String("mem", "", "file to save mem profiling")
@@ -89,6 +88,7 @@ func main() {
 		fmt.Println(len(result))
 	}
 }
+
 func max(a, b int) int {
 	if a > b {
 		return a
