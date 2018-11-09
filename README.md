@@ -1,6 +1,6 @@
 # go-rrect
 
-[![](https://godoc.org/github.com/alextanhongpin/go-stringdist?status.svg)](http://godoc.org/github.com/alextanhongpin/go-stringdist)
+[![](https://godoc.org/github.com/alextanhongpin/stringdist?status.svg)](http://godoc.org/github.com/alextanhongpin/stringdist)
 
 Autocorrect in golang with BK-Tree and Damerau Levenshtein edit distance
 
