@@ -1,8 +1,24 @@
-# go-rrect
+# stringdist
 
 [![](https://godoc.org/github.com/alextanhongpin/stringdist?status.svg)](http://godoc.org/github.com/alextanhongpin/stringdist)
 
-Autocorrect in golang with BK-Tree and Damerau Levenshtein edit distance
+`stringdist` package contains several string metrics for calculating edit distance between two different strings. This includes the _Levenshtein Distance_, _Damerau Levenshtein_ (both _Optimal String Alignment_, OSA and _true_ damerau levenshtein), Jaro, Jaro Winkler and additionally a _BK-Tree_ that can be used for autocorrect.
+
+## Algorithms
+
+- __Levenshtein__: A string metric for measuring the difference between two sequence. Done by computing the _minimum_ number of single-edit character edit (`insertion`, `substitution` and `deletion`) required to change from one word to another.
+- __Damerau-Levenshteim__: similar to Levenshtein, but allows transposition of two adjacent characters. Can be computed with two different algorithm - _Optimal String Alignment_, (OSA) and _true damerau-levenshtein_. The assumption for ASA is taht no substring is edited more than once.
+- __Jaro__: Jaro distance between two words is the minimum number of single-character transpositions required to change one word into the other.
+- __Jaro-Winkler__: Similar to Jaro, but uses a prefix scale which gives more favourable ratings to strings that match from the beginning for a set prefix length.
+- __BK-Tree__: A tree data structure specialized to index data in a metric space. Can be used for approximate string matching in a dictionary.
+
+Other algorithms to explore:
+- Sift3/4 algorithm
+- Soundex
+- Metaphone
+- Hamming Distance
+- Symspell
+- Linspell
 
 
 ## References
