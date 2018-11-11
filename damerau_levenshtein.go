@@ -19,6 +19,15 @@ func NewDamerauLevenshtein(size int) *DamerauLevenshtein {
 func (d *DamerauLevenshtein) Calculate(s, t string) int {
 	dp := d.buffer
 	m, n := len(s), len(t)
+	if m == 0 {
+		return n
+	}
+	if n == 0 {
+		return m
+	}
+	if max(m, n) > len(dp) {
+		panic("length exceeded")
+	}
 	// Set the first column for each row equal to the row number.
 	for i := 0; i < m+1; i++ {
 		dp[i][0] = i

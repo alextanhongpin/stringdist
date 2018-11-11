@@ -1,17 +1,29 @@
 package stringdist
 
 //func main() {
-	// gifts and profit is 5
-	// LD(CA,ABC) = 2 
-	//fmt.Println("Hello, playground", trueDamerauLevenshtein("gifts", "profit"))
+// gifts and profit is 5
+// LD(CA,ABC) = 2
+//fmt.Println("Hello, playground", trueDamerauLevenshtein("gifts", "profit"))
 //}
 
-func trueDamerauLevenshtein(s, t string) int {
+type TrueDamerauLevenshtein struct {
+	buffer [256]int
+}
+
+func NewTrueDamerauLevenshtein() *TrueDamerauLevenshtein {
+	return &TrueDamerauLevenshtein{}
+}
+
+func (dl *TrueDamerauLevenshtein) Calculate(s, t string) int {
 	m, n := len(s), len(t)
 
 	// Initialize a new array the size of alphabet.
-	da := make([]int, 256)
-	
+	da := dl.buffer
+	for i := 0; i < len(da); i++ {
+		da[i] = 0
+	}
+	// da := make([]int, 256)
+
 	// Initialize matrix d with the original length + 2.
 	d := make([][]int, m+2)
 	for i := 0; i < m+2; i++ {
@@ -36,11 +48,11 @@ func trueDamerauLevenshtein(s, t string) int {
 			cost := 0
 			if s[i-1] == t[j-1] {
 				cost = 0
-				db = j 
+				db = j
 			} else {
 				cost = 1
 			}
-			
+
 			k++
 			l++
 			d[i][j] = min(d[i-1][j-1]+cost, // substitution

@@ -18,8 +18,8 @@ func TestJaroWinkler(t *testing.T) {
 		{"JONES", "JOHNSON", 0.790, 0.832},
 		{"MASSEY", "MASSIE", 0.889, 0.933},
 		{"ABROMS", "ABRAMS", 0.889, 0.922},
-		{"HARDIN", "MARTINEZ", 0.722, 0.722},
 		// {"HARDIN", "MARTINEZ", 0.000, 0.000},
+		{"HARDIN", "MARTINEZ", 0.722, 0.722},
 		// {"ITMAN", "SMITH", 0.622, 0.622},
 		{"ITMAN", "SMITH", 0.467, 0.467},
 
