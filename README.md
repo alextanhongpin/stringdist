@@ -20,6 +20,17 @@ Other algorithms to explore:
 - Symspell
 - Linspell
 
+## Thoughts
+
+- Autocorrect can be implemented using any of the distance metrics (such as levenshtein) with BK-Tree
+- Distance metric can be supplied to bk-tree through an interface.
+- Dictionary words can first be supplied to the tree, and subsequent words can be added later through other means (syncing, streaming, pub-sub)
+- The tree can be snapshotted periodically to avoid rebuild (e.g. using `gob`), test should be conducted to see if rebuilding the tree is faster than reloading the whole tree.
+- Build tree through prefix (A-Z) would result in better performance (?). How to avoid hotspots (more characters in A than Z)?
+- Can part of the tree be transmitted through the network?
+- How to blacklist words that are not supposed to be searchable? (profanity words)
+- 
+
 
 ## References
 - https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Dice%27s_coefficient#Javascript
