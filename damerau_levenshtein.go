@@ -51,10 +51,10 @@ func (d *DamerauLevenshtein) Calculate(s, t string) int {
 				dp[i][j-1]+1,      // Insertion
 				dp[i-1][j-1]+cost, // Transposition
 			)
-			if i > 1 && j > 1 && s[i-1] == t[j-1] && s[i-2] == t[j-1] {
+			if i > 1 && j > 1 && s[i-1] == t[j-2] && s[i-2] == t[j-1] {
 				dp[i][j] = min(
 					dp[i][j],
-					dp[i-2][j-2]+cost,
+					dp[i-2][j-2]+1,
 				)
 			}
 		}
