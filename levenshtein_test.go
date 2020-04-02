@@ -19,6 +19,12 @@ func TestLevenshtein(t *testing.T) {
 		// x, y and y, x should produce the same result.
 		{"kitten", "sitting", 3},
 		{"sitting", "kitten", 3},
+		{"hello", "hello", 0},
+		{"", "", 0},
+		{"car", "rac", 2},
+		{"4XHYWD", "YLKTW9", 5},
+		{"YLKTW9", "4XHYWD", 5},
+		{"CA", "ABC", 3},
 	}
 	levenshtein := stringdist.NewLevenshtein(32)
 	for _, tt := range testcases {

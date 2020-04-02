@@ -1,7 +1,6 @@
 package stringdist_test
 
 import (
-	"log"
 	"math/rand"
 	"reflect"
 	"strings"
@@ -35,7 +34,8 @@ func (TestString) Generate(r *rand.Rand, size int) reflect.Value {
 }
 
 // Test if the values are within the upper and lower boundary.
-func TestTrueDamerauLevenshtein(t *testing.T) {
+func TestTrueDamerauLevenshteinQuickCheck(t *testing.T) {
+	T := t
 	dl := stringdist.NewTrueDamerauLevenshtein()
 	f := func(ts TestString) bool {
 		s, t := ts.source, ts.target
@@ -46,9 +46,32 @@ func TestTrueDamerauLevenshtein(t *testing.T) {
 		upper := max(m, n)
 
 		dist := dl.Calculate(s, t)
+		T.Log(dist, s, t, lower, upper)
 		return dist >= lower && dist <= upper
 	}
 	if err := quick.Check(f, nil); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
+	}
+}
+
+func TestTrueDamerauLevenshteinDistance(t *testing.T) {
+	dl := stringdist.NewTrueDamerauLevenshtein()
+	tests := []struct {
+		source, target string
+		dist           int
+	}{
+		{"kitten", "sitting", 3},
+		{"hello", "hello", 0},
+		{"", "", 0},
+		{"car", "rac", 2},
+		{"CA", "ABC", 2},
+		{"4XHYWD", "YLKTW9", 6},
+		{"YLKTW9", "4XHYWD", 6},
+	}
+	for _, tt := range tests {
+
+		if dist := dl.Calculate(tt.source, tt.target); dist != tt.dist {
+			t.Fatalf("expected %d, got %d for source %s, target %s", tt.dist, dist, tt.source, tt.target)
+		}
 	}
 }

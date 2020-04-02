@@ -22,7 +22,6 @@ func (dl *TrueDamerauLevenshtein) Calculate(s, t string) int {
 	for i := 0; i < len(da); i++ {
 		da[i] = 0
 	}
-	// da := make([]int, 256)
 
 	// Initialize matrix d with the original length + 2.
 	d := make([][]int, m+2)
@@ -52,13 +51,12 @@ func (dl *TrueDamerauLevenshtein) Calculate(s, t string) int {
 			} else {
 				cost = 1
 			}
-
 			k++
 			l++
-			d[i][j] = min(d[i-1][j-1]+cost, // substitution
-				d[i][j-1]+1,
-				d[i-1][j]+1,
-				d[k-1][l-1]+(i-k-1)+1+(j-l-1))
+			d[i][j] = min(d[i-1][j-1]+cost, // Substitution.
+				d[i][j-1]+1, // Insertion.
+				d[i-1][j]+1, // Deletion.
+				d[k-1][l-1]+(i-k-1)+1+(j-l-1)) // Transposition.
 
 		}
 		da[s[i-1]] = i
