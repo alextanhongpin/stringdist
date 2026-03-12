@@ -8,7 +8,7 @@ func NewDamerauLevenshtein(size int) *DamerauLevenshtein {
 	// Initialize reusable buffer. The size represents the maximum length
 	// of the word allowed. 32 is a good size.
 	buffer := make([][]int, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		buffer[i] = make([]int, size)
 	}
 	return &DamerauLevenshtein{

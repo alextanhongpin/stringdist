@@ -36,13 +36,13 @@ func (l *Levenshtein) Calculate(s, t string) int {
 	v0 := l.sourceBuffer[:n+1]
 	v1 := l.targetBuffer[:n+1]
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		v0[i] = i
 	}
 
-	for i := 0; i < m; i++ {
+	for i := range m {
 		v1[0] = i + 1
-		for j := 0; j < n; j++ {
+		for j := range n {
 			deletionCost := v0[j+1] + 1
 			insertionCost := v1[j] + 1
 			substitutionCost := v0[j] + 1

@@ -21,7 +21,7 @@ func (dl *TrueDamerauLevenshtein) Calculate(s, t string) int {
 
 	// Initialize a new array the size of alphabet.
 	da := dl.buffer
-	for i := 0; i < len(da); i++ {
+	for i := range len(da) {
 		da[i] = 0
 	}
 

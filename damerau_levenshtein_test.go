@@ -8,20 +8,6 @@ import (
 	"github.com/alextanhongpin/stringdist"
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // Test if the values are within the upper and lower boundary.
 func TestDamerauLevenshteinQuickCheck(t *testing.T) {
 	threshold := 32

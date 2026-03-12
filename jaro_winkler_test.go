@@ -2,6 +2,7 @@ package stringdist_test
 
 import (
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/alextanhongpin/stringdist"
@@ -33,6 +34,7 @@ func TestJaroWinkler(t *testing.T) {
 		{"JON", "JOHN", 0.917, 0.933},
 		// {"JON", "JAN", 0.000, 0.000},
 		{"JON", "JAN", 0.778, 0.800},
+		{strings.Repeat("a", 100), strings.Repeat("a", 99) + "b", 0.993, 0.996},
 	}
 	for _, tt := range tests {
 		jaro := stringdist.Jaro(tt.s1, tt.s2)

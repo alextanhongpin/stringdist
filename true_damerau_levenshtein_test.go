@@ -20,12 +20,12 @@ func (TestString) Generate(r *rand.Rand, size int) reflect.Value {
 	a, b := rand.Int()%256, rand.Int()%256
 	var sb strings.Builder
 	var alphabets = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
-	for i := 0; i < a; i++ {
+	for i := range a {
 		sb.WriteString(alphabets[i%26])
 	}
 	p.source = sb.String()
 	sb.Reset()
-	for i := 0; i < b; i++ {
+	for i := range b {
 		sb.WriteString(alphabets[i%26])
 	}
 	p.target = sb.String()
