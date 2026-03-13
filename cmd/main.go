@@ -15,13 +15,17 @@ import (
 	"github.com/alextanhongpin/stringdist"
 )
 
+type calculator interface {
+	Calculate(s, t string) int
+}
+
 func main() {
 	var (
-		cpuout = flag.String("cpu", "", "file to save cpu profiling")
-		memout = flag.String("mem", "", "file to save mem profiling")
+		cpuout = flag.String("cpu", "cpu.out", "file to save cpu profiling")
+		memout = flag.String("mem", "mem.out", "file to save mem profiling")
+		algo   = flag.String("algo", "levenshtein", "algo to use")
 	)
 	flag.Parse()
-	fmt.Println(*cpuout, *memout)
 	// Profile CPU.
 	f, err := os.Create(*cpuout)
 	if err != nil {
@@ -38,9 +42,16 @@ func main() {
 	defer mem.Close()
 
 	wordLen := 32
-	damerauLevenshtein := stringdist.NewDamerauLevenshtein(wordLen)
+
+	var calc calculator
+	switch *algo {
+	case "levenshtein":
+		calc = stringdist.NewLevenshtein(wordLen)
+	default:
+		calc = stringdist.NewDamerauLevenshtein(wordLen)
+	}
 	// Initialize BK-Tree.
-	bkTree := stringdist.NewBKTree(damerauLevenshtein)
+	bkTree := stringdist.NewBKTree(calc)
 
 	// Load sources to BK-Tree.
 	dict, err := os.Open("/usr/share/dict/words")
@@ -62,7 +73,10 @@ func main() {
 	reader := bufio.NewScanner(os.Stdin)
 	threshold := 2
 	for reader.Scan() {
-		search := reader.Text()
+		search := strings.TrimSpace(reader.Text())
+		if search == "exit" {
+			break
+		}
 		result := bkTree.Search(search, threshold)
 		// sort.Sort(result)
 		// Add more heuristic to just diplay the top 10 results. If the
@@ -86,9 +100,11 @@ func main() {
 			// is changed. One minus the percentage is the
 			// similarity score.
 			//results[i] = Result{match: res, score: stringdist.JaroWinkler(res, search)}
-			editDist := damerauLevenshtein.Calculate(res, search)
+			editDist := calc.Calculate(res, search)
 			editDistScore := 1 - float64(editDist)/float64(max(len(res), len(search)))
+			editDistScore = stringdist.JaroWinkler(search, res)
 			results[i] = Result{match: res, score: editDistScore}
+
 		}
 		slices.SortFunc(results, func(a, b Result) int {
 			return cmp.Or(
@@ -105,11 +121,13 @@ func main() {
 				break
 			}
 			fmt.Println(r.match, r.score)
+
 			if r.score == 1 {
 				fmt.Println("Exact match")
 				break
 			}
 		}
+		fmt.Println("\nEnter text to be autocorrected:")
 	}
 }
 
