@@ -30,10 +30,19 @@ func (d *DamerauLevenshtein) Calculate(s, t string) int {
 		return m
 	}
 
-	if c, ok := resize(cap(d.buffer), m+1); ok {
-		d.buffer = make([][]int, c)
+	cm, mok := resize(cap(d.buffer), m+1)
+	cn, nok := resize(cap(d.buffer[0]), n+1)
+	switch {
+	case mok:
+		// If we recreate buffer m, we need to create buffer n too.
+		d.buffer = make([][]int, cm)
 		for i := range d.buffer {
 			d.buffer[i] = make([]int, n+1)
+		}
+	case nok:
+		// Only resize n.
+		for i := range d.buffer {
+			d.buffer[i] = make([]int, cn)
 		}
 	}
 

@@ -59,46 +59,25 @@ func (b *BKTree) Add(word string) {
 	curNode.children[dist] = NewNode(word)
 }
 
-func (b *BKTree) recursiveSearch(node *Node, result *[]string, word string, d int) {
-	curDist := b.calculator.Calculate(node.word, word)
-	minDist := curDist - d
-	maxDist := curDist + d
-	if curDist <= d {
-		*result = append(*result, node.word)
-	}
-	for i := minDist; i < maxDist; i++ {
-		if children, found := node.children[i]; found {
-			b.recursiveSearch(children, result, word, d)
-		}
-	}
-}
-
 func (b *BKTree) Search(word string, d int) []string {
 	var result []string
-	b.recursiveSearch(b.root, &result, word, d)
+
+	var recursiveSearch func(node *Node, word string, d int)
+	recursiveSearch = func(node *Node, word string, d int) {
+		curDist := b.calculator.Calculate(node.word, word)
+		minDist := curDist - d
+		maxDist := curDist + d
+		if curDist <= d {
+			result = append(result, node.word)
+		}
+
+		for i := minDist; i < maxDist; i++ {
+			if children, found := node.children[i]; found {
+				recursiveSearch(children, word, d)
+			}
+		}
+	}
+
+	recursiveSearch(b.root, word, d)
 	return result
 }
-
-// // implement `Interface` in sort package.
-// type sortByteSlice [][]byte
-//
-// func (b sortByteSlice) Len() int {
-//         return len(b)
-// }
-//
-// func (b sortByteSlice) Less(i, j int) bool {
-//         // bytes package already implements Comparable for []byte.
-//         switch bytes.Compare(b[i], b[j]) {
-//         case -1:
-//                 return true
-//         case 0, 1:
-//                 return false
-//         default:
-//                 log.Panic("not fail-able with `bytes.Comparable` bounded [-1, 1].")
-//                 return false
-//         }
-// }
-//
-// func (b sortByteSlice) Swap(i, j int) {
-//         b[j], b[i] = b[i], b[j]
-// }
