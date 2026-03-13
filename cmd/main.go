@@ -2,12 +2,14 @@ package main
 
 import (
 	"bufio"
+	"cmp"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"slices"
 	"strings"
 
 	"github.com/alextanhongpin/stringdist"
@@ -71,7 +73,9 @@ func main() {
 		// Another way is to see how many times such word repeats in a
 		// corpus of text. (The probability of THE is higher than TEA,
 		// unless the content is about tea)
-		for _, res := range result {
+
+		results := make([]Result, len(result))
+		for i, res := range result {
 			// Calculate the similarity score for levenshtein:
 			// https://stackoverflow.com/questions/6087281/similarity-score-levenshtein
 
@@ -81,10 +85,35 @@ func main() {
 			// distance of 1 out of 5 means only 20% of the string
 			// is changed. One minus the percentage is the
 			// similarity score.
+			//results[i] = Result{match: res, score: stringdist.JaroWinkler(res, search)}
 			editDist := damerauLevenshtein.Calculate(res, search)
 			editDistScore := 1 - float64(editDist)/float64(max(len(res), len(search)))
-			fmt.Println(res, stringdist.JaroWinkler(res, search), editDistScore)
+			results[i] = Result{match: res, score: editDistScore}
 		}
-		fmt.Println(len(result))
+		slices.SortFunc(results, func(a, b Result) int {
+			return cmp.Or(
+				-cmp.Compare(a.score, b.score),           // Higher score,
+				-cmp.Compare(len(a.match), len(b.match)), // Similar length, longer preferred
+				strings.Compare(a.match, b.match),        // Sort alphabetically
+			)
+		})
+
+		fmt.Printf("\nFound %d results\n", len(result))
+
+		for i, r := range results {
+			if i > 10 {
+				break
+			}
+			fmt.Println(r.match, r.score)
+			if r.score == 1 {
+				fmt.Println("Exact match")
+				break
+			}
+		}
 	}
+}
+
+type Result struct {
+	match string
+	score float64
 }

@@ -28,8 +28,10 @@ func TestLevenshtein(t *testing.T) {
 	}
 	levenshtein := stringdist.NewLevenshtein(32)
 	for _, tt := range testcases {
-		if res := levenshtein.Calculate(tt.source, tt.target); res != tt.score {
-			t.Fatalf("expected %d, got %d for %s and %s", tt.score, res, tt.source, tt.target)
+		want := tt.score
+		got := levenshtein.Calculate(tt.source, tt.target)
+		if want != got {
+			t.Fatalf("levenshtein.Calculate(%q, %q) = %d, want %d", tt.source, tt.target, got, want)
 		}
 	}
 }

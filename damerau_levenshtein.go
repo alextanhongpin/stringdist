@@ -1,5 +1,10 @@
 package stringdist
 
+// The Damerau-Levenshtein distance measures the minimum number of
+// single-character edits—insertions, deletions, substitutions, or
+// transpositions of adjacent characters—needed to transform one string into
+// another. Unlike standard Levenshtein distance, it correctly handles
+// transpositions as a single operation (e.g., "CA" to "ABC" is 2, not 3)
 type DamerauLevenshtein struct {
 	buffer [][]int
 }
@@ -17,7 +22,6 @@ func NewDamerauLevenshtein(size int) *DamerauLevenshtein {
 }
 
 func (d *DamerauLevenshtein) Calculate(s, t string) int {
-	dp := d.buffer
 	m, n := len(s), len(t)
 	if m == 0 {
 		return n
@@ -25,15 +29,26 @@ func (d *DamerauLevenshtein) Calculate(s, t string) int {
 	if n == 0 {
 		return m
 	}
-	if max(m, n) > len(dp) {
-		panic("length exceeded")
+
+	if c, ok := resize(cap(d.buffer), m+1); ok {
+		d.buffer = make([][]int, c)
+		for i := range d.buffer {
+			d.buffer[i] = make([]int, n+1)
+		}
 	}
+
+	dp := d.buffer
+	dp = dp[:m+1]
+	for i := range dp {
+		dp[i] = dp[i][:n+1]
+	}
+
 	// Set the first column for each row equal to the row number.
-	for i := 0; i < m+1; i++ {
+	for i := range m + 1 {
 		dp[i][0] = i
 	}
 	// Set the first row to equal the column number.
-	for i := 0; i < n+1; i++ {
+	for i := range n + 1 {
 		dp[0][i] = i
 	}
 	// Starts from i = 1, which is an empty string.
@@ -41,9 +56,11 @@ func (d *DamerauLevenshtein) Calculate(s, t string) int {
 		for j := 1; j <= n; j++ {
 			// Cost is 1 if the strings are not equal (requires
 			// transposition), else 0.
-			cost := 1
+			var cost int
 			if s[i-1] == t[j-1] {
 				cost = 0
+			} else {
+				cost = 1
 			}
 			// Find the minimum of the operations.
 			dp[i][j] = min(

@@ -2,6 +2,7 @@ package stringdist_test
 
 import (
 	"log"
+	"strings"
 	"testing"
 	"testing/quick"
 
@@ -51,6 +52,7 @@ func TestDamerauLevenshtein(t *testing.T) {
 		{"4XHYWD", "YLKTW9", 5},
 		{"YLKTW9", "4XHYWD", 5},
 		{"CA", "ABC", 3},
+		{strings.Repeat("A", 100), strings.Repeat("A", 99) + "B", 1},
 	}
 	levenshtein := stringdist.NewDamerauLevenshtein(32)
 	for _, tt := range testcases {
